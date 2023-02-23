@@ -56,10 +56,9 @@ public class KeyLockData : MonoBehaviour
                 storedPositions.Add(player.transform.position); //store the position every frame
             }
 
-            if (storedPositions.Count > followDistance)
+            if (storedPositions.Count > followDistance + (keyNumber * 10))
             {
-                Vector3 offset = new Vector3(keyNumber * 1.5f, keyNumber  * 1.5f, 0);
-                transform.position = storedPositions[0] + offset; //move
+                transform.position = storedPositions[0]; //move
                 storedPositions.RemoveAt(0); //delete the position that player just move to
             }
         }
