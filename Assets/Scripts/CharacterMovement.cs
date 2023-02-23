@@ -20,8 +20,9 @@ public class CharacterMovement : MonoBehaviour
     private Rigidbody2D m_Rigidbody2D;
     private bool m_FacingRight = true;  // For determining which way the player is currently facing.
     private Vector3 m_Velocity = Vector3.zero;
-    private bool ExtraJump = true;
+    public bool ExtraJump = true;
     Animator anim;
+    public float jumpDirection = 1.0f; 
 
     [Header("Events")]
     [Space]
@@ -48,6 +49,7 @@ public class CharacterMovement : MonoBehaviour
 
     private void Update()
     {
+
     }
 
     private void FixedUpdate()
@@ -122,24 +124,29 @@ public class CharacterMovement : MonoBehaviour
             // If the input is moving the player right and the player is facing left...
             if (move > 0 && !m_FacingRight)
             {
-                m_FacingRight = !m_FacingRight;
+                // m_FacingRight = !m_FacingRight;
+                Flip();
             }
             // Otherwise if the input is moving the player left and the player is facing right...
             else if (move < 0 && m_FacingRight)
             {
-                m_FacingRight = !m_FacingRight;
+                //m_FacingRight = !m_FacingRight;
+                Flip();
             }
+
+           
         }
         // If the player should jump...
         if (m_Grounded && jump)
         {
             m_Grounded = false;
-            m_Rigidbody2D.AddForce(new Vector2(0f, m_JumpForce));
+            m_Rigidbody2D.AddForce(new Vector2(0f, m_JumpForce * jumpDirection));
         }
         else if (jump && ExtraJump)
         {
             ExtraJump = false;
-            m_Rigidbody2D.AddForce(new Vector2(0f, m_JumpForce));
+            m_Rigidbody2D.velocity = Vector3.zero;
+            m_Rigidbody2D.AddForce(new Vector2(0f, m_JumpForce * jumpDirection));
         }
     }
 
@@ -155,11 +162,6 @@ public class CharacterMovement : MonoBehaviour
         transform.localScale = theScale;
     }
 
-    private void OnCollisionEnter2D(Collision2D collision)
-    {
-        if (collision.gameObject.layer == 12)
-        {
-            ExtraJump = true;
-        }
-    }
+   
+
 }
