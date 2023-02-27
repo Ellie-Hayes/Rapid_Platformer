@@ -7,11 +7,8 @@ public class PlayerCont : MonoBehaviour
 {
     [Header("Movement")]
     public CharacterMovement controller;
-    float horizontalMove = 0f;
     public float runSpeed = 40f;
-
-
-    [Header("Jumping")]
+    float horizontalMove = 0f;
     Rigidbody2D rb;
     [SerializeField] private LayerMask ground;
     bool jump = false;
@@ -23,12 +20,22 @@ public class PlayerCont : MonoBehaviour
 
     
     [Header("Death")]
-    public Transform Checkpoint;
-    public Transform StartPoint;
-    public GameObject soul;
-
+    Transform Checkpoint;
+    [SerializeField] Transform StartPoint;
+    [SerializeField] GameObject soul;
     CameraFollow cameraFollow;
-    bool dead; 
+    bool dead;
+
+    [SerializeField] GameObject JumpDownEffect;
+
+    [Header("Dash")]
+    private bool canDash = true;
+
+    private bool isDashing = false;
+    [SerializeField] private float dashingPower = 100f;
+    [SerializeField] private float dashingTime = 0.5f;
+    [SerializeField] private float dashingCooldown = 1.5f;
+
 
     // Start is called before the first frame update
     void Start()
@@ -60,10 +67,16 @@ public class PlayerCont : MonoBehaviour
             scale.y *= -1;
             transform.localScale = scale;
         }
+        if (Input.GetKeyDown(KeyCode.F) && canDash)
+        {
+            StartCoroutine("Dash");
+        }
     }
 
     private void FixedUpdate()
     {
+        if (isDashing) { return; }
+        
         controller.Move(horizontalMove * Time.fixedDeltaTime, false, jump);
         jump = false;
     }
@@ -72,7 +85,8 @@ public class PlayerCont : MonoBehaviour
     {
         if (collision.gameObject.layer == 8)
         {
-            controller.ExtraJump = true; 
+            controller.ExtraJump = true;
+            
         }
         if (collision.gameObject.layer == 10)
         {
@@ -111,4 +125,28 @@ public class PlayerCont : MonoBehaviour
         Checkpoint = target;
         StartPoint = Checkpoint;
     }
+
+    private IEnumerator Dash()
+    {
+        canDash = false;
+        isDashing = true;
+        float originalGravity = rb.gravityScale;
+        rb.gravityScale = 0f;
+
+        Vector3 worldPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        if (worldPosition.x < transform.position.x) { rb.velocity = new Vector2(-dashingPower, 0f); }
+        else { rb.velocity = new Vector2(dashingPower, 0f); }
+
+        //trailRend.emitting = true;
+        yield return new WaitForSeconds(dashingTime);
+        //trailRend.emitting = false;
+        rb.gravityScale = originalGravity;
+        rb.velocity= Vector3.zero;
+        isDashing = false;
+
+        yield return new WaitForSeconds(dashingCooldown);
+        canDash = true;
+    }
+
+
 }

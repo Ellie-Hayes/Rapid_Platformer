@@ -22,7 +22,7 @@ public class CharacterMovement : MonoBehaviour
     private Vector3 m_Velocity = Vector3.zero;
     public bool ExtraJump = true;
     Animator anim;
-    public float jumpDirection = 1.0f; 
+    public float jumpDirection = 1.0f;
 
     [Header("Events")]
     [Space]
@@ -35,6 +35,9 @@ public class CharacterMovement : MonoBehaviour
     public BoolEvent OnCrouchEvent;
     private bool m_wasCrouching = false;
 
+    [Header("Effects")]
+    [SerializeField] GameObject JumpUpEffect;
+    
 
     private void Awake()
     {
@@ -141,12 +144,18 @@ public class CharacterMovement : MonoBehaviour
         {
             m_Grounded = false;
             m_Rigidbody2D.AddForce(new Vector2(0f, m_JumpForce * jumpDirection));
+
+            Vector3 InstantiatePlace = new Vector3(transform.position.x, transform.position.y, transform.position.z);
+            Instantiate(JumpUpEffect, InstantiatePlace, transform.rotation);
         }
         else if (jump && ExtraJump)
         {
             ExtraJump = false;
             m_Rigidbody2D.velocity = Vector3.zero;
             m_Rigidbody2D.AddForce(new Vector2(0f, m_JumpForce * jumpDirection));
+
+            Vector3 InstantiatePlace = new Vector3(transform.position.x, transform.position.y, transform.position.z);
+            Instantiate(JumpUpEffect, InstantiatePlace, transform.rotation);
         }
     }
 
