@@ -36,6 +36,8 @@ public class PlayerCont : MonoBehaviour
     [SerializeField] private float dashingTime = 0.5f;
     [SerializeField] private float dashingCooldown = 1.5f;
 
+    [SerializeField] Animator anim; 
+
 
     // Start is called before the first frame update
     void Start()
@@ -44,7 +46,8 @@ public class PlayerCont : MonoBehaviour
         Checkpoint = StartPoint;
 
         cameraFollow = GameObject.FindGameObjectWithTag("MainCamera").GetComponent<CameraFollow>();
-        cameraFollow.followObj = gameObject; 
+        cameraFollow.followObj = gameObject;
+
     }
 
     // Update is called once per frame
@@ -53,6 +56,8 @@ public class PlayerCont : MonoBehaviour
         if (dead) { return; }
        
         horizontalMove = Input.GetAxisRaw("Horizontal") * runSpeed;
+        anim.SetFloat("speed", Mathf.Abs(horizontalMove));
+        anim.SetBool("dashing", isDashing);
 
         if (Input.GetKeyDown(KeyCode.Space))
         {
