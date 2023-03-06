@@ -6,14 +6,16 @@ public class CameraFollow : MonoBehaviour
 {
     // Start is called before the first frame update
     public GameObject followObj;
-    void Start()
-    {
-        followObj = GameObject.FindGameObjectWithTag("Player");
-    }
+    [SerializeField] float offset;
+   
 
     // Update is called once per frame
     void Update()
     {
-        transform.position = new Vector3(followObj.transform.position.x, followObj.transform.position.y, -10);
+        if (followObj == null)
+        {
+            followObj = GameObject.FindGameObjectWithTag("Player");
+        }
+        transform.position = new Vector3(followObj.transform.position.x, followObj.transform.position.y, offset);
     }
 }

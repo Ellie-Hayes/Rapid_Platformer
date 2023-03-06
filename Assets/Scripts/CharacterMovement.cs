@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -21,7 +22,7 @@ public class CharacterMovement : MonoBehaviour
     private bool m_FacingRight = true;  // For determining which way the player is currently facing.
     private Vector3 m_Velocity = Vector3.zero;
     public bool ExtraJump = true;
-    Animator anim;
+    [SerializeField] Animator anim;
     public float jumpDirection = 1.0f;
 
     [Header("Events")]
@@ -34,9 +35,20 @@ public class CharacterMovement : MonoBehaviour
 
     public BoolEvent OnCrouchEvent;
     private bool m_wasCrouching = false;
-
-    [Header("Effects")]
     [SerializeField] GameObject JumpUpEffect;
+
+    [SerializeField] private Transform m_wallCheck;
+    [SerializeField] private float wallSlidingSpeed;
+    private bool m_isWallSliding;
+    private bool m_Walled; 
+    private float horizontal;
+
+    private bool isWallJumping;
+    private float wallJumpingDirection;
+    private float wallJumpingTime = 0.2f;
+    private float wallJumpingCounter;
+    private float wallJumpingDuration = 0.4f;
+    private Vector2 wallJumpingPower = new Vector2(8f, 16f);
     
 
     private void Awake()
@@ -52,13 +64,57 @@ public class CharacterMovement : MonoBehaviour
 
     private void Update()
     {
+        anim.SetBool("onGround", m_Grounded);
+        anim.SetBool("wallSliding", m_isWallSliding);
+        anim.SetFloat("yVelocity", m_Rigidbody2D.velocity.y);
+        WallSlide();
 
+        horizontal = Input.GetAxisRaw("Horizontal");
+        WallSlide();
+        WallJump();
     }
 
+    private void WallSlide()
+    {
+        if (m_Walled && !m_Grounded && horizontal != 0f)
+        {
+            m_isWallSliding = true;
+            Debug.Log("slide");
+            m_Rigidbody2D.velocity = new Vector2(m_Rigidbody2D.velocity.x, Mathf.Clamp(m_Rigidbody2D.velocity.y, -wallSlidingSpeed, float.MaxValue));
+        }
+        else
+        {
+            m_isWallSliding = false;
+        }
+    }
+
+    private void WallJump()
+    {
+        if (m_isWallSliding)
+        {
+            isWallJumping = false;
+            wallJumpingDirection = -transform.localScale.x;
+            wallJumpingCounter = wallJumpingTime;
+
+            CancelInvoke(nameof(StopWallJumping));
+        }
+        else
+        {
+            wallJumpingCounter -= Time.deltaTime;
+        }
+    }
+
+    void StopWallJumping()
+    {
+        isWallJumping = false; 
+    }
+
+   
     private void FixedUpdate()
     {
         bool wasGrounded = m_Grounded;
         m_Grounded = Physics2D.OverlapCircle(m_GroundCheck.position, 10f, 12);
+        m_Walled = Physics2D.OverlapCircle(m_wallCheck.position, 0.2f, m_WhatIsGround);
 
         // The player is grounded if a circlecast to the groundcheck position hits anything designated as ground
         // This can be done using layers instead but Sample Assets will not overwrite your project settings.
@@ -148,6 +204,19 @@ public class CharacterMovement : MonoBehaviour
             Vector3 InstantiatePlace = new Vector3(transform.position.x, transform.position.y, transform.position.z);
             Instantiate(JumpUpEffect, InstantiatePlace, transform.rotation);
         }
+        else if (wallJumpingCounter > 0f && jump)
+        {
+            isWallJumping = true; 
+            m_Rigidbody2D.velocity = new Vector2(wallJumpingDirection * wallJumpingPower.x, wallJumpingPower.y);
+            wallJumpingCounter = 0f;
+
+            if (transform.localScale.x != wallJumpingDirection)
+            {
+                Flip();
+            }
+
+            Invoke(nameof(StopWallJumping), wallJumpingDuration);
+        }
         else if (jump && ExtraJump)
         {
             ExtraJump = false;
@@ -157,6 +226,7 @@ public class CharacterMovement : MonoBehaviour
             Vector3 InstantiatePlace = new Vector3(transform.position.x, transform.position.y, transform.position.z);
             Instantiate(JumpUpEffect, InstantiatePlace, transform.rotation);
         }
+       
     }
 
 

@@ -13,12 +13,6 @@ public class DeathProjectile : MonoBehaviour
 
     Vector3 Direction;
     float distanceThisFrame;
-    CameraFollow cameraFollow;
-
-    private void Start()
-    {
-        cameraFollow = GameObject.FindGameObjectWithTag("MainCamera").GetComponent<CameraFollow>();
-    }
 
     void Update()
     {
@@ -47,7 +41,6 @@ public class DeathProjectile : MonoBehaviour
 
         player.transform.position = Target.position;
         player.GetComponent<PlayerCont>().GetCheckpoint(Target);
-        cameraFollow.followObj = player; 
         Destroy(this.gameObject);
 
         yield return null;

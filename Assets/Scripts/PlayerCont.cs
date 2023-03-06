@@ -36,7 +36,11 @@ public class PlayerCont : MonoBehaviour
     [SerializeField] private float dashingTime = 0.5f;
     [SerializeField] private float dashingCooldown = 1.5f;
 
-    [SerializeField] Animator anim; 
+    [SerializeField] Animator anim;
+
+    bool IsDay = true;
+    [SerializeField] GameObject spriteMask; 
+    Animator maskAnim;
 
 
     // Start is called before the first frame update
@@ -45,9 +49,7 @@ public class PlayerCont : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
         Checkpoint = StartPoint;
 
-        cameraFollow = GameObject.FindGameObjectWithTag("MainCamera").GetComponent<CameraFollow>();
-        cameraFollow.followObj = gameObject;
-
+        maskAnim = spriteMask.GetComponent<Animator>();
     }
 
     // Update is called once per frame
@@ -56,26 +58,12 @@ public class PlayerCont : MonoBehaviour
         if (dead) { return; }
        
         horizontalMove = Input.GetAxisRaw("Horizontal") * runSpeed;
+
+        Inputs();
+
         anim.SetFloat("speed", Mathf.Abs(horizontalMove));
         anim.SetBool("dashing", isDashing);
-
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            jump = true;
-        }
-        if (Input.GetMouseButtonDown(0))
-        {
-            rb.gravityScale = rb.gravityScale * -1;
-            controller.jumpDirection = controller.jumpDirection * -1;
-
-            Vector3 scale = transform.localScale;
-            scale.y *= -1;
-            transform.localScale = scale;
-        }
-        if (Input.GetKeyDown(KeyCode.F) && canDash)
-        {
-            StartCoroutine("Dash");
-        }
+        maskAnim.SetBool("IsDay", IsDay);
     }
 
     private void FixedUpdate()
@@ -88,28 +76,20 @@ public class PlayerCont : MonoBehaviour
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        if (collision.gameObject.layer == 8)
-        {
-            controller.ExtraJump = true;
-            
-        }
-        if (collision.gameObject.layer == 10)
-        {
-            StartCoroutine(SpawnSoul());
-        }
-       
-
+        if (collision.gameObject.layer == 8) { controller.ExtraJump = true; } // Give extra jump for wall sliding and hitting ground in general
+        if (collision.gameObject.layer == 10) { StartCoroutine(SpawnSoul()); } // Kills the player when hit enemy / obstacles
     }
 
     IEnumerator SpawnSoul()
     {
+        spriteMask.transform.parent = null;
         GameObject Soul = (GameObject)Instantiate(soul, this.transform.position, this.transform.rotation);
         DeathProjectile projectile = Soul.GetComponent<DeathProjectile>();
 
         projectile.player = gameObject; 
         projectile.ChaseEnemy(Checkpoint);
 
-        cameraFollow.followObj = Soul;
+        changeFollowObj(Soul);
         transform.position = new Vector2(-186.8f, 10f);
         rb.gravityScale = 2;
 
@@ -124,11 +104,16 @@ public class PlayerCont : MonoBehaviour
         yield break;
     }
 
-    public void GetCheckpoint(Transform target)
+    public void GetCheckpoint(Transform target) // Called when player is "revived"
     {
         dead = false;
         Checkpoint = target;
         StartPoint = Checkpoint;
+
+        changeFollowObj(this.gameObject);
+
+        spriteMask.transform.parent = this.transform;
+        spriteMask.transform.position = transform.position;
     }
 
     private IEnumerator Dash()
@@ -153,5 +138,35 @@ public class PlayerCont : MonoBehaviour
         canDash = true;
     }
 
+    public void changeFollowObj(GameObject objToFollow)
+    {
+        CameraFollow[] followingObjects = FindObjectsOfType<CameraFollow>();
+
+        foreach (var obj in followingObjects)
+        {
+            obj.followObj = objToFollow;
+        }
+    }
+
+    void Inputs()
+    {
+       
+        if (Input.GetKeyDown(KeyCode.Space)) { jump = true; }  //Jump
+        if (Input.GetKeyDown(KeyCode.F) && canDash) { StartCoroutine("Dash"); } //Dash 
+        if (Input.GetKeyDown(KeyCode.N)) { IsDay = !IsDay; } //Night
+
+        //Mouse gravity to be changed
+        if (Input.GetMouseButtonDown(0))
+        {
+            rb.gravityScale = rb.gravityScale * -1;
+            controller.jumpDirection = controller.jumpDirection * -1;
+
+            Vector3 scale = transform.localScale;
+            scale.y *= -1;
+            transform.localScale = scale;
+        }
+
+        
+    }
 
 }
