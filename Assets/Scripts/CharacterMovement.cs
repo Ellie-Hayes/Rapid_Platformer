@@ -49,9 +49,13 @@ public class CharacterMovement : MonoBehaviour
     private float wallJumpingCounter;
     private float wallJumpingDuration = 0.4f;
     private Vector2 wallJumpingPower = new Vector2(8f, 16f);
-    
 
-    private void Awake()
+    [SerializeField] private float fallMultiplier = 2.5f;
+    [SerializeField] private float lowJumpMultiplier = 2f;
+
+
+
+  private void Awake()
     {
         m_Rigidbody2D = GetComponent<Rigidbody2D>();
 
@@ -70,8 +74,8 @@ public class CharacterMovement : MonoBehaviour
         WallSlide();
 
         horizontal = Input.GetAxisRaw("Horizontal");
-        WallSlide();
-        WallJump();
+        Jump();
+       // WallJump();
     }
 
     private void WallSlide()
@@ -199,7 +203,7 @@ public class CharacterMovement : MonoBehaviour
         if (m_Grounded && jump)
         {
             m_Grounded = false;
-            m_Rigidbody2D.AddForce(new Vector2(0f, m_JumpForce * jumpDirection));
+            m_Rigidbody2D.velocity = Vector2.up * m_JumpForce; 
 
             Vector3 InstantiatePlace = new Vector3(transform.position.x, transform.position.y, transform.position.z);
             Instantiate(JumpUpEffect, InstantiatePlace, transform.rotation);
@@ -221,12 +225,24 @@ public class CharacterMovement : MonoBehaviour
         {
             ExtraJump = false;
             m_Rigidbody2D.velocity = Vector3.zero;
-            m_Rigidbody2D.AddForce(new Vector2(0f, m_JumpForce * jumpDirection));
+            m_Rigidbody2D.velocity = Vector2.up * m_JumpForce;
 
             Vector3 InstantiatePlace = new Vector3(transform.position.x, transform.position.y, transform.position.z);
             Instantiate(JumpUpEffect, InstantiatePlace, transform.rotation);
         }
        
+    }
+
+    private void Jump()
+    {
+        if (m_Rigidbody2D.velocity.y < 0)
+        {
+            m_Rigidbody2D.velocity += Vector2.up * Physics2D.gravity.y * (fallMultiplier - 1) * Time.deltaTime;
+        }
+        else if (m_Rigidbody2D.velocity.y > 0 && !Input.GetKey(KeyCode.Space))
+        {
+            m_Rigidbody2D.velocity += Vector2.up * Physics2D.gravity.y * (lowJumpMultiplier - 1) * Time.deltaTime;
+        }
     }
 
 
