@@ -28,6 +28,7 @@ public class SunAndMoon : MonoBehaviour
         if(collision.gameObject.tag == "Player")
         {
             playerInRange = true;
+            playerCont.Checkpoint = transform; 
         }
     }
 

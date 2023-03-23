@@ -39,6 +39,8 @@ public class DeathProjectile : MonoBehaviour
             yield return null;
         }
 
+        Debug.Log("At checkpoint");
+        Debug.Log(Target.position);
         player.transform.position = Target.position;
         player.GetComponent<PlayerCont>().GetCheckpoint(Target);
         Destroy(this.gameObject);

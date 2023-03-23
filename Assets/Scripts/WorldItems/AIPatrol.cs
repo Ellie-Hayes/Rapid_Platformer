@@ -6,11 +6,14 @@ public class AIPatrol : MonoBehaviour
 {
     [SerializeField] float walkSpeed;
     [SerializeField] Transform GroundCheckPos;
+    [SerializeField] Transform WallCheckPos; 
     [SerializeField] LayerMask groundLayer;
+    [SerializeField] LayerMask enemyLayer;
 
     bool mustPatrol;
     Rigidbody2D rb;
     bool mustturn;
+    bool mustTurnWall;
     
 
     void Start()
@@ -32,11 +35,12 @@ public class AIPatrol : MonoBehaviour
         if (mustPatrol == true)
         {
             mustturn = !Physics2D.OverlapCircle(GroundCheckPos.position, 0.1f, groundLayer);
+            mustTurnWall = Physics2D.OverlapCircle(WallCheckPos.position, 0.1f, groundLayer) || Physics2D.OverlapCircle(WallCheckPos.position, 0.1f, enemyLayer);
         }
     }
     public void Patrol()
     {
-        if (mustturn == true)
+        if (mustturn || mustTurnWall)
         {
             flip();
         }

@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.Burst.Intrinsics;
 using UnityEngine;
+using TMPro;
 
 public class PlayerCont : MonoBehaviour
 {
@@ -20,11 +21,11 @@ public class PlayerCont : MonoBehaviour
 
     
     [Header("Death")]
-    Transform Checkpoint;
+    public  Transform Checkpoint;
     [SerializeField] Transform StartPoint;
     [SerializeField] GameObject soul;
     CameraFollow cameraFollow;
-    bool dead;
+    [SerializeField]bool dead;
 
     [SerializeField] GameObject JumpDownEffect;
 
@@ -43,8 +44,13 @@ public class PlayerCont : MonoBehaviour
     [SerializeField] GameObject spriteMask; 
     Animator maskAnim;
 
-    public GhostEffect ghost; 
+    public GhostEffect ghost;
 
+    [Header("UI")]
+    [SerializeField] TextMeshProUGUI scoreText;
+
+    int score = 0; 
+    
 
     // Start is called before the first frame update
     void Start()
@@ -67,12 +73,7 @@ public class PlayerCont : MonoBehaviour
         anim.SetBool("dashing", isDashing);
         maskAnim.SetBool("IsDay", IsDay);
 
-        //Vector3 worldPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        //Vector2 Point_1 = new Vector2(transform.position.x, transform.position.y);
-        //Vector2 Point_2 = new Vector2(worldPosition.x, worldPosition.y);
-        //float angle = Mathf.Atan2(Point_2.y - Point_1.y, Point_2.x - Point_1.x) * Mathf.Rad2Deg;
-
-        //Debug.Log(angle);
+        scoreText.text = "Score: " + score.ToString();
     }
 
     private void FixedUpdate()
@@ -86,40 +87,51 @@ public class PlayerCont : MonoBehaviour
     private void OnCollisionEnter2D(Collision2D collision)
     {
         if (collision.gameObject.layer == 8) { controller.ExtraJump = true; } // Give extra jump for wall sliding and hitting ground in general
-        if (collision.gameObject.layer == 10) { StartCoroutine(SpawnSoul()); } // Kills the player when hit enemy / obstacles
+        if (collision.gameObject.layer == 10 || collision.gameObject.layer == 12) { StartCoroutine(SpawnSoul()); } // Kills the player when hit enemy / obstacles
+    }
+
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (collision.gameObject.tag == "Coin") { score += 15; Destroy(collision.gameObject); }
     }
 
     IEnumerator SpawnSoul()
     {
+        Debug.Log("Dying");
         spriteMask.transform.parent = null;
         GameObject Soul = (GameObject)Instantiate(soul, this.transform.position, this.transform.rotation);
         DeathProjectile projectile = Soul.GetComponent<DeathProjectile>();
+        Debug.Log(Soul);
 
         projectile.player = gameObject; 
         projectile.ChaseEnemy(Checkpoint);
 
         changeFollowObj(Soul);
         transform.position = new Vector2(-186.8f, 10f);
-        rb.gravityScale = 4;
+       // rb.gravityScale = 4;
 
         controller.jumpDirection = 1;
 
         dead = true; 
 
-        //reset level
         yield break;
     }
 
     public void GetCheckpoint(Transform target) // Called when player is "revived"
     {
+        Debug.Log("Running get checkpoint");
         dead = false;
-        Checkpoint = target;
-        StartPoint = Checkpoint;
+        //Checkpoint = target;
+        //StartPoint = Checkpoint;
 
         changeFollowObj(this.gameObject);
-
+        transform.position = target.position;
         spriteMask.transform.parent = this.transform;
         spriteMask.transform.position = transform.position;
+
+        Debug.Log("Finished get checkpoint");
+        StartCoroutine("death");
+
     }
 
     private IEnumerator Dash()
@@ -190,6 +202,21 @@ public class PlayerCont : MonoBehaviour
     public void ChangeWorld()
     {
         IsDay = !IsDay;
+
+        if (IsDay) { scoreText.color = Color.black; }
+        else { scoreText.color = Color.white;}
     }
 
+    IEnumerator death()
+    {
+        Debug.Log("Running death");
+        yield return new WaitForEndOfFrame();
+
+        dead = false;
+
+        changeFollowObj(this.gameObject);
+        transform.position = Checkpoint.position;
+        spriteMask.transform.parent = this.transform;
+        spriteMask.transform.position = transform.position;
+    }
 }

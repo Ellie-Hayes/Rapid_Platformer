@@ -13,8 +13,9 @@ public class KeyLockData : MonoBehaviour
     private List<Vector3> storedPositions;
 
     PlayerCont playerController;
-    int keyNumber; 
+    int keyNumber;
 
+    LockUI lockUI;
     void Awake()
     {
         playerController = player.GetComponent<PlayerCont>();
@@ -36,7 +37,11 @@ public class KeyLockData : MonoBehaviour
     }
     void Start()
     {
-        
+        if (!key) {
+            lockUI = GetComponentInChildren<LockUI>();
+            lockUI.colour = KeyLockColour;
+        }
+       
     }
 
     // Update is called once per frame
@@ -76,9 +81,12 @@ public class KeyLockData : MonoBehaviour
                 KeyLockData data = obj.GetComponent<KeyLockData>();
                 if (data.KeyLockColour == KeyLockColour)
                 {
+                    Door door = GetComponent<Door>();
+                    LockUI ui = GetComponentInChildren<LockUI>();
                     controller.ownedItems.Remove(obj);
                     Destroy(obj);
-                    Destroy(gameObject);
+                    door.moveUp = true; 
+                    ui.open= true;
                 }
             }
         }
