@@ -6579,6 +6579,18 @@ Tilemap:
     e31: 0
     e32: 0
     e33: 1
+--- !u!114 &1633440575 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3828317304354438589, guid: 38d2fdf994b9db34ea60f0e963dea15a,
+    type: 3}
+  m_PrefabInstance: {fileID: 3828317305185056252}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e59c4aaacbf525c4ea10f51d03ee7ca6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!850595691 &1648366263
 LightingSettings:
   m_ObjectHideFlags: 0
@@ -8499,7 +8511,7 @@ PrefabInstance:
         type: 3}
       propertyPath: affectedDoor
       value: 
-      objectReference: {fileID: 262675315}
+      objectReference: {fileID: 1633440575}
     - target: {fileID: 4433608817759985833, guid: cf2076a44ea1c414f84f3589c0b70a53,
         type: 3}
       propertyPath: m_RootOrder
@@ -8576,6 +8588,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: Lever static
       objectReference: {fileID: 0}
+    - target: {fileID: 5107566326770334012, guid: 6761ed2641fa1cf4cbb7056a0abcd384,
+        type: 3}
+      propertyPath: affectedDoor
+      value: 
+      objectReference: {fileID: 262675315}
     - target: {fileID: 5107566326770334014, guid: 6761ed2641fa1cf4cbb7056a0abcd384,
         type: 3}
       propertyPath: m_RootOrder
