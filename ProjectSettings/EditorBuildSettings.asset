@@ -5,10 +5,13 @@ EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Scenes:
-  - enabled: 0
-    path: 
-    guid: 00000000000000000000000000000000
   - enabled: 1
-    path: Assets/Scenes/AnimationPlatformer.unity
-    guid: 62d76b64fb33b7747823849587d1309a
+    path: Assets/Scenes/MainMenu.unity
+    guid: 4525fa7ede878ad4f93c2ec4b6043c68
+  - enabled: 1
+    path: Assets/Scenes/Level1.unity
+    guid: 9458b5c0ed3f3344c812dfaa9b238f4b
+  - enabled: 1
+    path: Assets/Scenes/Level2.unity
+    guid: 02722753d288d9a4bac73407fa59a192
   m_configObjects: {}

@@ -49,8 +49,18 @@ public class PlayerCont : MonoBehaviour
     [Header("UI")]
     [SerializeField] TextMeshProUGUI scoreText;
 
-    int score = 0; 
-    
+    int score = 0;
+    bool paused;
+    [SerializeField] GameObject dayPaused;
+    [SerializeField] GameObject nightPaused;
+    [SerializeField] GameObject pausePanel;
+
+    [Header("Sound effects")]
+    [SerializeField] AudioClip jumpSound;
+    [SerializeField] AudioClip coinSound;
+    [SerializeField] AudioSource audio;
+
+    public List<TextMeshProUGUI> tutorialTexts = new List<TextMeshProUGUI>();
 
     // Start is called before the first frame update
     void Start()
@@ -92,7 +102,7 @@ public class PlayerCont : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.gameObject.tag == "Coin") { score += 15; Destroy(collision.gameObject); }
+        if (collision.gameObject.tag == "Coin") { score += 15; Destroy(collision.gameObject); audio.PlayOneShot(coinSound); }
     }
 
     IEnumerator SpawnSoul()
@@ -108,7 +118,6 @@ public class PlayerCont : MonoBehaviour
 
         changeFollowObj(Soul);
         transform.position = new Vector2(-186.8f, 10f);
-       // rb.gravityScale = 4;
 
         controller.jumpDirection = 1;
 
@@ -121,8 +130,6 @@ public class PlayerCont : MonoBehaviour
     {
         Debug.Log("Running get checkpoint");
         dead = false;
-        //Checkpoint = target;
-        //StartPoint = Checkpoint;
 
         changeFollowObj(this.gameObject);
         transform.position = target.position;
@@ -182,18 +189,20 @@ public class PlayerCont : MonoBehaviour
     void Inputs()
     {
        
-        if (Input.GetKeyDown(KeyCode.Space)) { jump = true; }  //Jump
+        if (Input.GetKeyDown(KeyCode.Space)) { jump = true; audio.PlayOneShot(jumpSound); }  //Jump
         if (Input.GetKeyDown(KeyCode.F) && canDash) { StartCoroutine("Dash"); } //Dash 
-
-        //Mouse gravity to be changed
-        if (Input.GetMouseButtonDown(0))
+        if (Input.GetKeyDown(KeyCode.Escape))
         {
-            rb.gravityScale = rb.gravityScale * -1;
-            controller.jumpDirection = controller.jumpDirection * -1;
+            paused = !paused;
 
-            Vector3 scale = transform.localScale;
-            scale.y *= -1;
-            transform.localScale = scale;
+            if (paused) { Time.timeScale = 0; }
+            else { Time.timeScale = 1; }
+
+            pausePanel.SetActive(!pausePanel.activeSelf);
+
+            if (IsDay) { dayPaused.SetActive(true); nightPaused.SetActive(false); }
+            else { dayPaused.SetActive(false); nightPaused.SetActive(true); }
+            
         }
 
         
@@ -203,8 +212,10 @@ public class PlayerCont : MonoBehaviour
     {
         IsDay = !IsDay;
 
-        if (IsDay) { scoreText.color = Color.black; }
-        else { scoreText.color = Color.white;}
+        if (IsDay) { scoreText.color = Color.black; changeTutorials(Color.black); }
+        else { scoreText.color = Color.white; changeTutorials(Color.white); }
+
+        
     }
 
     IEnumerator death()
@@ -218,5 +229,13 @@ public class PlayerCont : MonoBehaviour
         transform.position = Checkpoint.position;
         spriteMask.transform.parent = this.transform;
         spriteMask.transform.position = transform.position;
+    }
+
+    void changeTutorials(Color colour)
+    {
+        foreach (var text in tutorialTexts)
+        {
+            text.color = colour;
+        }
     }
 }
